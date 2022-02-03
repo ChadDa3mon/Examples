@@ -28,8 +28,6 @@ DBhost = config['DB']['DBHost']
 DBUser = config['DB']['DBUser']
 DBPass = config['DB']['DBPass']
 
-# Parent,Name,Description,Type,Host,Port,URL,User,Password,Reference,ReferenceID,Secret
-#csvHeader = ["BT System Name", "System ID", "BT Domain", "BT Device Description", "SNOW CI Name", "SNOW Asset Name", "SNOW CI IP", "SL1 Region", "SNOW CID","SNOW Customer Name","Match Source","NA"]
 csvHeader = ["Parent", "Name", "Description", "Type", "Host", "Port", "URL", "User", "Password", "Reference", "ReferenceID", "Secret"]
 output = open('sekrets.csv', 'w')
 writer = csv.writer(output)
@@ -48,16 +46,6 @@ cur = conn.cursor()
 # Setup Logging
 logging.basicConfig(filename='csv.log', level=logging.DEBUG)
 
-#def ConvertPlatform(BTPlatformName):
-    # This will take the Platform Name from BeyondTrust and convert it to the Platform Name we need in XTAM
-
-#def GetPassword(SysID,AcctName):
-#    statement = "Select AccountPass from passwords where SysName = (%s) and AccountName = (%s)"
-#    data = (SysID,AcctName)
-#    cur.execute(statement, data)
-#    row = cur.fetchone()
-#    Password = row[0]
-#    return(Password)
 
 def GetAccounts(SysID):
     statement = "Select AccountName,AccountPass,PlatformName from passwords where SysID = (%s)"
@@ -68,12 +56,6 @@ def GetAccounts(SysID):
 
 
 def WriteCSV(ciName,Region,CustomerName,CustomerID,Description,IP,UserName,UserPass,Platform,Archive):
-    #print(f"Customers/{Region}/{CustomerName} - {CID},{ciName},{Description},{Platform},{IP},<Port>,,{UserName},{Password},,,")
-    #csvOut = [BTSystemName,SystemID,DomainName,DeviceDescription,"NULL","NULL","NULL","NULL","NULL","NULL","Unknown","Help Me2"]    
-    ###
-    ### Important
-    ### Put the Platform variable back in, you replaced it with "Unix Host" for testing
-    #name = str(tmpName) + " - " + str(userName)
     name = str(ciName) + " - " + str(UserName)
     # Some customers have a "/" in their name and it messes up the way XTAM imports records via CSV. 
     # This next line removes that "/"
@@ -163,8 +145,6 @@ def ConvertPlatform(PlatformName):
 def main(TestMode):
     try:
         statement = "SELECT * from combinedlist ORDER BY snowCID ASC LIMIT 500"
-        #data = (sysName)
-        #cur.execute(statement, data)
         cur.execute(statement)
         conn.commit()
         data = cur.fetchall()
@@ -196,11 +176,8 @@ def main(TestMode):
         # XTAM Headers for Import
         # Parent,Name,Description,Type,Host,Port,URL,User,Password,Reference,ReferenceID,Secret
         # Type can be Folder or Record (Windows, SSH, AD etc)
-        #(ciName,Region,CustomerName,CustomerID,Description,IP,UserName,UserPass,Platform)
             WriteCSV(ciName,Region,CustomerName,CID,Description,IP,UserName,Password,NewPlatform,"False")
-        #print(f"Customers/{Region}/{CustomerName} - {CID},{ciName},{Description},{Platform},{IP},<Port>,,{UserName},{Password},,,")
 
-#TestMode = "Unknown"
 n = len(sys.argv)
 if str(n) == "2":
     if sys.argv[1] == "test":
